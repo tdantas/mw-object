@@ -2,12 +2,22 @@ const _ = require('lodash');
 
 module.exports = Chain;
 
-function Chain(names, object) {
+const defaults = { dispatcherName: 'run' };
+
+function Chain(names, object, opts) {
+  const config = _.defaults(opts, defaults);
+
   if (object === undefined)
     object = { };
     
    const handlers = { };
-   return names.reduce(register, object);
+   names.reduce(register, object);
+
+   if (object.mw)
+     throw new Error('object has already mw function. use dispatcherName option to change'); 
+
+   object[config.dispatcherName] = run;
+   return object;
 
   function register(obj, method) {
     const snake_case = _.snakeCase(method);
@@ -20,7 +30,7 @@ function Chain(names, object) {
         console.warn(`overriding ${snake_case} function`);
 
     obj[camelCase] = obj[snake_case] = mwWrapper;
-    mwWrapper.run = run.bind(null, snake_case);
+    mwWrapper[config.dispatcherName] = run.bind(null, snake_case);
 
     function mwWrapper() {
       const args = _.toArray(arguments);

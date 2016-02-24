@@ -3,6 +3,14 @@ const assert = require('assert');
 
 const httpVerbs = ['get', 'post', 'put', 'delete'];
 
+function delay(fn, times) {
+  var count = 1;
+  return function wrapper() {
+    if (count < times) return count++;
+    fn();
+  }
+}
+
 describe('Middleware Object', () => {
 
   it('returns an object with functions associated', () => {
@@ -68,4 +76,34 @@ describe('Middleware Object', () => {
     function validate(request, next) { setTimeout(done, 0); }
     function verify() { assert(false, 'should never be here'); }
   });
+
+  it('do not throw for invalid function name', () => {
+    const app = Chain(['get']);
+  
+    app.get(validate, verify);
+    app.run('post',{});
+
+    function validate(request, next) { assert(false, 'should never be here'); }
+    function verify() { assert(false, 'should never be here'); }
+  });
+
+  it('throw if conflicts dispatcher function name', () => {
+    Chain(['get'], { run: function() {} });
+  });
+
+  it('allows to change the dispatcher function name', (done) => {
+    done = delay(done, 2);
+    var obj = { run: true };
+    const app = Chain(['get'], obj, { dispatcherName: 'mw' });
+  
+    app.get(validate, verify);
+    app.mw('get', {});
+    app.get.mw({});
+
+    function validate(request, next) { next(); }
+    function verify() { done(); }
+    
+  
+  });
+
 });
