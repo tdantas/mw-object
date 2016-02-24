@@ -1,0 +1,17 @@
+{
+  "name": "mw-object",
+  "version": "1.0.0",
+  "description": "",
+  "main": "chain.js",
+  "scripts": {
+    "test": "mocha test"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "lodash": "^4.5.1"
+  },
+  "devDependencies": {
+    "mocha": "^2.4.5"
+  }
+}
